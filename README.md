@@ -119,8 +119,10 @@ IDs, network interfaces or hostname. See [verified detector sources](docs/DETECT
 Akamai's ephemeral metadata token is held only in memory, never saved.
 OVH VPS currently returns explicit unknowns with a DMI hint where present;
 OpenStack metadata alone would not prove OVH identity. All five adapters have
-fixture tests. Live provider metadata, full pilot workloads and the 24-hour schedule require
-separate qualification; local container compatibility does not establish them.
+fixture tests. DigitalOcean / fra1 metadata detection and all smoke workloads have also been
+verified on a real Ubuntu 24.04 x86-64 VPS. Full pilot workloads, the 24-hour
+schedule and the remaining provider detectors require separate qualification;
+see [qualification evidence and limits](docs/QUALIFICATION.md).
 
 Hardware collection is allowlisted: CPU model/architecture/count, RAM, OS/kernel,
 virtualization, block names/sizes/filesystems/mounts and the test-file location.

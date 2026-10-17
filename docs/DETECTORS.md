@@ -14,5 +14,7 @@ We intentionally do not read a full cloud metadata root, user data, public keys,
 account IDs, instance IDs or IP interfaces. Shared OpenStack paths, hostnames,
 DMI, ASN and geolocation cannot alone establish provider/location. Multiple
 responding adapters produce conflict status. A fixture validates parser behavior,
-not availability or authenticity on an actual host. All five launch providers
-still require live acceptance against the exact selected OS image and service.
+not availability or authenticity on an actual host. DigitalOcean provider/region detection was verified on a real Ubuntu 24.04
+x86-64 Droplet in fra1 on 17 October 2026, without overrides. See
+[qualification](QUALIFICATION.md). The other four launch providers still require
+live acceptance against the selected OS image and service.
