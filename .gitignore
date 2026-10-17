@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.env*
+dist/
+SOURCE_COMMIT
+SHA256SUMS
+shapehost-report/
+report*/
+*.sqlite*
