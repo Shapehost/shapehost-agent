@@ -1,6 +1,7 @@
 # Compatibility harness only. Container scores are not provider benchmark evidence.
 FROM ubuntu:24.04
-COPY shapehost-agent-0.2.0.tar.gz /tmp/agent-release.tar.gz
+ARG AGENT_VERSION=0.2.1
+COPY shapehost-agent-${AGENT_VERSION}.tar.gz /tmp/agent-release.tar.gz
 RUN mkdir /tmp/release && tar -xzf /tmp/agent-release.tar.gz -C /tmp/release \
  && cd /tmp/release/agent && ./install.sh \
  && shapehost-agent --version \

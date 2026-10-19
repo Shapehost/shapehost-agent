@@ -39,4 +39,10 @@ with tempfile.TemporaryDirectory(prefix='shapehost-build-') as directory:
     with zipfile.ZipFile(executable) as app:
         assert manifest['source'] in app.read('build_info.py').decode()
         assert 'report.schema.json' in app.namelist()
-    print(json.dumps({'reproducibleBuild':True,'archiveChecksums':len(entries),'versionCLI':version,'dryRun':'passed','inspectCLI':'passed','embeddedProvenance':True}))
+    # A conflicting version must fail before changing any other output file.
+    executable.write_bytes(b'preserved prior release bytes')
+    protected={p.name:p.read_bytes() for p in output.iterdir() if p.is_file()}
+    conflict=subprocess.run(command,capture_output=True,text=True)
+    assert conflict.returncode!=0 and 'Refusing to overwrite versioned artifact' in conflict.stderr
+    assert protected=={p.name:p.read_bytes() for p in output.iterdir() if p.is_file()},'Conflicting build changed existing outputs'
+    print(json.dumps({'immutableVersionedArtifacts':True,'reproducibleBuild':True,'archiveChecksums':len(entries),'versionCLI':version,'dryRun':'passed','inspectCLI':'passed','embeddedProvenance':True}))

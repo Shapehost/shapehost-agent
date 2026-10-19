@@ -23,7 +23,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = '0.2.0'
+VERSION = '0.2.1'
 SCHEMA = 'shapehost-report/v1'
 MAX_ARTIFACT = 1_000_000
 META = 'http://169.254.169.254'
@@ -86,7 +86,7 @@ def detect_provider(fetch=fetch_metadata, vendor=''):
         matches.append(('Vultr', vultr, None, None, 'Vultr metadata /v1/region/regioncode'))
     token = fetch('/v1/token', method='PUT', headers={'Metadata-Token-Expiry-Seconds': '60'})
     if token and len(token) < 4096:
-        raw = fetch('/v1/instance', headers={'Metadata-Token': token})
+        raw = fetch('/v1/instance', headers={'Metadata-Token': token, 'Accept': 'application/json'})
         try:
             data = json.loads(raw or '{}')
             # Discard label, SSH keys, user data, IDs and tags. Retain only these fields.

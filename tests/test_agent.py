@@ -49,6 +49,25 @@ class DetectionTests(unittest.TestCase):
         for secret in ['SECRET_LABEL','SECRET_KEY','do-not-retain-token']:
             self.assertNotIn(secret,json.dumps(found))
 
+    def test_akamai_requests_json_only_for_instance_get(self):
+        calls=[]
+        def fetch(path,method='GET',headers=None):
+            calls.append((path,method,headers))
+            if path=='/v1/token':return 'ephemeral-test-token'
+            if path=='/v1/instance':
+                if headers.get('Accept')=='application/json':
+                    return json.dumps({'region':'gb-lon','type':'g6-standard-2'})
+                return 'region: gb-lon\ninstance_type: g6-standard-2'
+            return None
+        found=a.detect_provider(fetch)
+        self.assertEqual(found['provider']['value'],'Akamai / Linode')
+        self.assertEqual(found['region']['value'],'gb-lon')
+        self.assertEqual(found['plan']['value'],'g6-standard-2')
+        self.assertIn(('/v1/token','PUT',{'Metadata-Token-Expiry-Seconds':'60'}),calls)
+        self.assertIn(('/v1/instance','GET',{'Metadata-Token':'ephemeral-test-token','Accept':'application/json'}),calls)
+        self.assertFalse(any(headers and 'Accept' in headers for path,method,headers in calls if path!='/v1/instance'))
+        self.assertNotIn('ephemeral-test-token',json.dumps(found))
+
     def test_ovh_hint_does_not_claim_identity(self):
         found=a.detect_provider(lambda *a,**k:None,vendor='OVHcloud')
         self.assertEqual(found['provider']['status'],'unknown')
@@ -336,7 +355,7 @@ class ExecutionBoundaryTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()) as output,self.assertRaises(SystemExit) as result:
             a.main(['--version'])
         self.assertEqual(result.exception.code,0)
-        self.assertIn('0.2.0',output.getvalue())
+        self.assertIn(a.VERSION,output.getvalue())
 
     def test_failed_measurement_retains_error_without_zero_metrics(self):
         with tempfile.TemporaryDirectory() as folder:

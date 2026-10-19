@@ -1,12 +1,17 @@
-# Shape.host benchmark agent 0.2.0
+# Shape.host benchmark agent 0.2.1
 
 This directory is a standalone MIT licensed executable and source release. The upstream repository is
 [Shapehost/shapehost-agent](https://github.com/Shapehost/shapehost-agent).
-Version 0.2.0 is a pilot prerelease; live-provider qualification remains open.
+Version 0.2.1 is a pilot prerelease containing the Linode JSON metadata fix.
+It preserves the workload settings of 0.2.0; qualification limits remain explicit.
 The Python agent detects supported metadata fields, runs bounded sequential
 workloads, preserves local evidence and automatically submits to Shape.host when
 an invited submission credential is configured. The server always requires human
 review before publication.
+
+The 0.2.1 patch requests JSON from Linode instance metadata. Unknown metadata
+remains unknown; supplied provider/location overrides are separate evidence.
+Existing reports and older release packages are not modified.
 
 ## Install and run
 

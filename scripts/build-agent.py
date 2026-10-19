@@ -41,7 +41,6 @@ import subprocess\nimport shapehost_agent as agent\nfrom build_info import SOURC
             app.writestr(info,data)
     executable=archive.getvalue()
     app_name=f'shapehost-agent-{version}.pyz'
-    (OUTPUT/app_name).write_bytes(executable);(OUTPUT/app_name).chmod(0o755)
     contents['bin/shapehost-agent.pyz']=executable
     contents['SHA256SUMS']=''.join(f'{hashlib.sha256(data).hexdigest()}  {name}\n' for name,data in sorted(contents.items())).encode()
     payload=io.BytesIO()
@@ -50,12 +49,22 @@ import subprocess\nimport shapehost_agent as agent\nfrom build_info import SOURC
             info=tarfile.TarInfo('agent/'+name);info.size=len(data);info.mtime=0;info.uid=info.gid=0;info.uname=info.gname='';info.mode=0o755 if name in ['install.sh','shapehost_agent.py','bin/shapehost-agent.pyz'] else 0o644
             tar.addfile(info,io.BytesIO(data))
     bundle=f'shapehost-agent-{version}.tar.gz'
-    (OUTPUT/bundle).write_bytes(gzip.compress(payload.getvalue(),compresslevel=9,mtime=0))
+    payloads={app_name:executable,bundle:gzip.compress(payload.getvalue(),compresslevel=9,mtime=0)}
     artifacts=[]
-    for name in [app_name,bundle]:
-        file=OUTPUT/name;sha=hashlib.sha256(file.read_bytes()).hexdigest()
-        (OUTPUT/(name+'.sha256')).write_text(f'{sha}  {name}\n')
-        artifacts.append({'file':name,'sha256':sha,'bytes':file.stat().st_size})
+    for name,data in list(payloads.items()):
+        sha=hashlib.sha256(data).hexdigest()
+        payloads[name+'.sha256']=f'{sha}  {name}\n'.encode()
+        artifacts.append({'file':name,'sha256':sha,'bytes':len(data)})
+    # Versioned artifacts are immutable. Check every destination before writing.
+    for name,data in payloads.items():
+        destination=OUTPUT/name
+        if destination.exists() and destination.read_bytes()!=data:
+            raise ValueError(f'Refusing to overwrite versioned artifact: {name}; choose a new version or an empty output directory')
+    for name,data in payloads.items():
+        destination=OUTPUT/name
+        if not destination.exists():
+            with destination.open('xb') as handle:handle.write(data)
+    (OUTPUT/app_name).chmod(0o755)
     manifest={'version':version,'source':provenance,'runtime':'Python 3.12 on Ubuntu 24.04','architectures':['x86_64','aarch64'],'artifacts':artifacts}
     (OUTPUT/'agent-release.json').write_text(json.dumps(manifest,indent=2)+'\n')
     print(json.dumps(manifest,indent=2))

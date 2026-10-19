@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.1 — 2026-10-19
+
+- Request `Accept: application/json` for the Linode `/v1/instance` metadata
+  endpoint so a plain-text response cannot break JSON provider/plan detection.
+  The token request is unchanged and its token remains in memory only.
+- Regression coverage verifies the JSON header, selected metadata fields and
+  exclusion of the ephemeral token from the detector result.
+- The platform accepts 0.2.1 reports through private intake while preserving
+  support for 0.1.0 and 0.2.0. Publication still requires administrator review.
+- Workload settings and the pilot methodology are unchanged. Earlier campaign
+  reports keep their recorded version and source; this release does not relabel
+  them or claim automatic detection where metadata was unavailable.
+
 ## 0.2.0 — 2026-10-17
 
 - Reproducible executable Python zipapp and source archive, with checksums and
